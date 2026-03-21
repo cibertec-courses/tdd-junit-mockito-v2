@@ -3,8 +3,7 @@ package edu.pe.cibertec;
 public class Triangle {
 
 
-
-    public enum TriangleType{
+    public enum TriangleType {
         EQUILATERAL,
         ISOSCELES,
         SCALENE,
@@ -12,8 +11,11 @@ public class Triangle {
     }
 
     public TriangleType classfy(int a, int b, int c) {
-        if(a ==b & b==c){
+        if (a == b && b == c) {
             return TriangleType.EQUILATERAL;
+        }
+        if (a == b || b == c || a == c  ){
+            return  TriangleType.ISOSCELES;
         }
         return TriangleType.SCALENE;
     }
