@@ -17,16 +17,28 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public Reservation getReservation(Long id) {
-        return null;
+        return repository.findById(id)
+                .orElseThrow( () -> new ReservationNotFoundException(id));
     }
 
     @Override
     public Reservation registerReservation(Reservation reservation) {
-        return null;
+        if(repository.finByRoomNumberAndCheckInDate(
+                reservation.getRoomNumber(),
+                reservation.getCheckInDate()
+        ).isPresent()){
+            throw  new IllegalArgumentException(
+                    "Room " + reservation.getRoomNumber()
+                    + " is already reserver on "+ reservation.getCheckInDate()
+            );
+        }
+        return repository.save(reservation);
     }
 
     @Override
     public void deleteReservation(Long id) {
 
     }
+
+
 }

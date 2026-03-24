@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -29,11 +29,11 @@ public class ReservationServiceImplTest {
     ///  getAllReservations
     @Test
     @DisplayName("Returns all reservations from repository")
-    void givenReservationsExist_whenGetAllReservations_thenReturnList(){
+    void givenReservationsExist_whenGetAllReservations_thenReturnList() {
         // ARRANGE: We prepared a list of reservation in memory
         List<Reservation> reservations = List.of(
-          new Reservation(1L, "Laura Torres", "101","2026-04-01"),
-          new Reservation(2L, "Rodrigo Palacios", "102", "2026-04-02")
+                new Reservation(1L, "Laura Torres", "101", "2026-04-01"),
+                new Reservation(2L, "Rodrigo Palacios", "102", "2026-04-02")
         );
 
         // When findAll() is runs, mock returns our list.
@@ -50,6 +50,52 @@ public class ReservationServiceImplTest {
     }
 
     ///  getReservationById
+    @Test
+    @DisplayName("Returns reservation whe ID exists")
+    void givenExistingId_whenGetReservationById_thenReturnReservation() {
+        Reservation reservation = new Reservation(1L, "Pedro Paucar", "101", "2026-04-10");
+        when(repository.findById(1L)).thenReturn(Optional.of(reservation));
+        Reservation result = service.getReservation(1L);
+        assertEquals("Pedro Paucar", result.getGuestName());
+        verify(repository, times(1)).findById(1L);
+    }
 
+    ///  Throws exception when ID doesn't exist
+    @Test
+
+    @DisplayName("Throws exception when ID doesn't exist")
+    void givenReservationId_whenNotExists_thenThrowException() {
+        // ARRANGE
+        Long id = 10L;
+        when(repository.findById(id)).thenReturn(Optional.empty());
+        assertThrows(ReservationNotFoundException.class, () -> service.getReservation(10L));
+        verify(repository, times(1)).findById(id);
+
+    }
+
+    ///  registerReservation
+    @Test
+    @DisplayName("Registers reservation when room is available on that date")
+    void givenAvailableRoom_whenRegisterReservation_thenReturnSavedReservation() {
+        Reservation reservation =
+                new Reservation(1L, "Laura Torres", "101", "2026-04-01");
+        when(repository.finByRoomNumberAndCheckInDate("101", "2026-04-01"))
+                .thenReturn(Optional.empty());
+        when(repository.save(reservation)).thenReturn(reservation);
+        Reservation result = service.registerReservation(reservation);
+        assertEquals("Laura Torres", result.getGuestName());
+        verify(repository, times(1)).save(reservation);
+    }
+
+    @Test
+    @DisplayName("Throws exception when room is already reserved on that date")
+    void givenOccupiedRoom_whenRegisterReservation_thenThrowsException() {
+        Reservation reservation =
+                new Reservation(1L, "Laura Torres", "101", "2026-04-01");
+        when(repository.finByRoomNumberAndCheckInDate("101", "2026-04-01"))
+                .thenReturn(Optional.of(reservation));
+        assertThrows(IllegalArgumentException.class, () -> service.registerReservation(reservation));
+        verify(repository, never()).save(any());
+    }
 
 }
