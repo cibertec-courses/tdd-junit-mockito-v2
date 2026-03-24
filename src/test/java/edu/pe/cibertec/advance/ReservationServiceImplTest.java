@@ -98,4 +98,14 @@ public class ReservationServiceImplTest {
         verify(repository, never()).save(any());
     }
 
+    ///  deleteReservation
+    @Test
+    @DisplayName("Throws exception when delete reservation non-existing ID")
+    void givenReservationDoesNotExist_whenDeleteReservation_thenThrowException(){
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(ReservationNotFoundException.class, () -> service.deleteReservation(1L));
+        verify(repository, never()).deleteById(any());
+    }
+
 }
+

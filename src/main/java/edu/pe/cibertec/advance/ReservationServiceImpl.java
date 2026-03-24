@@ -37,7 +37,9 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public void deleteReservation(Long id) {
-
+        repository.findById(id)
+                .orElseThrow( () -> new ReservationNotFoundException(id));
+        repository.deleteById(id);
     }
 
 
